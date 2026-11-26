@@ -55,14 +55,30 @@
         </ul>
         <div class="mt-4 flex items-center gap-4 lg:mt-0">
           <a
-            :href="`${APP}/login?${utm('header_login')}`"
-            class="inline-flex min-h-[44px] items-center px-1 font-bold underline decoration-2 underline-offset-4"
+            v-if="hint"
+            :href="`${APP}${dashboardPath(hint)}?${utm('header_account')}`"
+            class="btn btn-gold min-h-[44px] max-w-full gap-2.5 pl-2 pr-4 text-[0.95rem]"
           >
-            Masuk
+            <span
+              class="inline-grid h-7 w-7 flex-none place-items-center rounded-sm border-line border-ink bg-white font-extrabold leading-none"
+              aria-hidden="true"
+            >
+              {{ hint.name.charAt(0).toUpperCase() }}
+            </span>
+            <span class="max-w-[16ch] truncate">{{ hint.name }}</span>
+            <span class="sr-only">, buka dasbor</span>
           </a>
-          <a :href="`${APP}/register?${utm('header_register')}`" class="btn btn-gold min-h-[44px] px-4 text-[0.95rem]">
-            Daftar gratis
-          </a>
+          <template v-else>
+            <a
+              :href="`${APP}/login?${utm('header_login')}`"
+              class="inline-flex min-h-[44px] items-center px-1 font-bold underline decoration-2 underline-offset-4"
+            >
+              Masuk
+            </a>
+            <a :href="`${APP}/register?${utm('header_register')}`" class="btn btn-gold min-h-[44px] px-4 text-[0.95rem]">
+              Daftar gratis
+            </a>
+          </template>
         </div>
       </nav>
     </div>
@@ -73,8 +89,10 @@
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { APP, LANDING, utm } from "../lib/blog";
+import { readSessionHint, dashboardPath } from "../lib/sessionHint";
 
 const open = ref(false);
+const hint = ref(null);
 const route = useRoute();
 
 const links = [
@@ -89,6 +107,9 @@ const onKey = (e) => {
 };
 
 watch(() => route.fullPath, () => (open.value = false));
-onMounted(() => document.addEventListener("keydown", onKey));
+onMounted(() => {
+  hint.value = readSessionHint();
+  document.addEventListener("keydown", onKey);
+});
 onBeforeUnmount(() => document.removeEventListener("keydown", onKey));
 </script>
